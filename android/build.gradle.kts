@@ -1,6 +1,3 @@
-import com.android.build.gradle.LibraryExtension
-import com.android.build.gradle.AppExtension
-
 allprojects {
     repositories {
         google()
@@ -20,17 +17,34 @@ subprojects {
     afterEvaluate {
         if (project.hasProperty("android")) {
             try {
-                val android = project.extensions.findByName("android")
-                when (android) {
-                    is LibraryExtension -> {
-                        if (android.compileSdk == null) {
-                            android.compileSdk = 34
+                // 使用 Groovy 兼容的方式设置 compileSdkVersion
+                val android = project.extensions.getByName("android")
+                if (android != null) {
+                    // 尝试通过反射设置 compileSdkVersion
+                    val androidClass = android.javaClass
+                    try {
+                        // 检查是否已有 compileSdkVersion
+                        val getCompileSdkVersion = androidClass.methods.find { 
+                            it.name == "getCompileSdkVersion" || it.name == "getCompileSdk"
                         }
-                    }
-                    is AppExtension -> {
-                        if (android.compileSdk == null) {
-                            android.compileSdk = 34
+                        if (getCompileSdkVersion != null) {
+                            val currentSdk = getCompileSdkVersion.invoke(android)
+                            if (currentSdk == null) {
+                                // 设置 compileSdkVersion
+                                val setCompileSdkVersion = androidClass.methods.find { 
+                                    it.name == "setCompileSdkVersion" || it.name == "setCompileSdk"
+                                }
+                                setCompileSdkVersion?.invoke(android, 34)
+                            }
+                        } else {
+                            // 如果找不到 getter，直接尝试设置
+                            val setCompileSdkVersion = androidClass.methods.find { 
+                                it.name == "setCompileSdkVersion" || it.name == "setCompileSdk"
+                            }
+                            setCompileSdkVersion?.invoke(android, 34)
                         }
+                    } catch (e: Exception) {
+                        // 忽略错误，让 Flutter 插件加载器处理
                     }
                 }
             } catch (e: Exception) {
