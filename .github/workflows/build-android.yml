@@ -1,0 +1,99 @@
+name: Build Android APK
+
+on:
+  push:               # 触发所有分支和标签的推送
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Setup signing key (if available)
+        run: |
+          if [ -n "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "检测到签名密钥，配置签名..."
+            # 解码并保存 keystore 文件（放在 android/ 目录）
+            echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/upload-keystore.jks
+            # 创建 key.properties 文件（路径相对于 android/ 目录）
+            cat > android/key.properties << EOF
+          storeFile=upload-keystore.jks
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          EOF
+            echo "签名配置完成"
+          else
+            echo "未检测到签名密钥，将使用 debug 签名"
+          fi
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Get tag name and generate APK filename
+        id: tag
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            TAG_NAME="${{ github.ref_name }}"
+            # 移除 'v' 或 'V' 前缀（如果存在），统一使用大写 V
+            CLEAN_TAG=${TAG_NAME#v}
+            CLEAN_TAG=${CLEAN_TAG#V}
+            # 生成文件名：MRSG-V1.0.0-release.apk
+            APK_NAME="MRSG-V${CLEAN_TAG}-release.apk"
+            echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
+            echo "apk_name=${APK_NAME}" >> $GITHUB_OUTPUT
+            echo "is_tag=true" >> $GITHUB_OUTPUT
+          else
+            BRANCH_NAME="${{ github.ref_name }}"
+            # 清理分支名（移除特殊字符，替换 / 为 -）
+            CLEAN_BRANCH=${BRANCH_NAME//\//-}
+            APK_NAME="MRSG-${CLEAN_BRANCH}-debug.apk"
+            echo "tag_name=" >> $GITHUB_OUTPUT
+            echo "apk_name=${APK_NAME}" >> $GITHUB_OUTPUT
+            echo "is_tag=false" >> $GITHUB_OUTPUT
+          fi
+          echo "Generated APK name: $APK_NAME"
+        shell: bash
+
+      - name: Rename APK
+        run: mv build/app/outputs/flutter-apk/app-release.apk "${{ steps.tag.outputs.apk_name }}"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: |
+            ${{ steps.tag.outputs.apk_name }}
+          retention-days: 30
+
+      - name: Create Release (only for tags)
+        if: steps.tag.outputs.is_tag == 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ steps.tag.outputs.apk_name }}
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
