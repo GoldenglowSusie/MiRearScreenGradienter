@@ -1,3 +1,6 @@
+// 应用 init.gradle 脚本为所有插件提供默认配置
+apply(from = "init.gradle")
+
 allprojects {
     repositories {
         google()
@@ -8,15 +11,12 @@ allprojects {
 val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
 rootProject.layout.buildDirectory.value(newBuildDir)
 
-// 应用 init.gradle 脚本为所有插件提供默认配置
-apply(from = "init.gradle")
-
 subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
     
     // 为所有子项目（包括插件）提供默认的 compileSdk 配置
-    // 这解决了 Flutter 插件无法访问 flutter 对象的问题
+    // 使用 afterEvaluate 确保在插件 build.gradle 评估后设置
     afterEvaluate {
         if (project.hasProperty("android")) {
             try {
@@ -48,7 +48,7 @@ subprojects {
                     }
                 }
             } catch (e: Exception) {
-                // 忽略配置错误，让 Flutter 插件加载器处理
+                // 忽略配置错误
             }
         }
     }

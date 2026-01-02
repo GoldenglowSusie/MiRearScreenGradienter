@@ -2,27 +2,18 @@
 // 这个文件使用 Groovy 语法，确保与插件的 build.gradle 兼容
 
 allprojects {
-    afterEvaluate { project ->
-        if (project.hasProperty("android")) {
-            def android = project.extensions.findByName("android")
-            if (android != null) {
-                // 如果 compileSdkVersion 未设置，设置默认值
-                try {
-                    if (android.compileSdkVersion == null) {
-                        android.compileSdkVersion = 34
-                    }
-                } catch (e) {
-                    // 如果 compileSdkVersion 属性不存在，尝试使用 compileSdk
-                    try {
-                        if (android.compileSdk == null) {
-                            android.compileSdk = 34
-                        }
-                    } catch (e2) {
-                        // 忽略错误
-                    }
-                }
-            }
+    beforeEvaluate { project ->
+        // 只为插件项目（不是 app 项目）注入配置
+        if (project.path != ":app" && project.path.startsWith(":")) {
+            // 创建一个包含 compileSdkVersion 的配置对象
+            // 使用 Expando 来创建一个动态对象，支持属性访问
+            def flutterConfig = new Expando()
+            flutterConfig.compileSdkVersion = 34
+            flutterConfig.targetSdkVersion = 34
+            flutterConfig.minSdkVersion = 24
+            
+            // 将 flutter 对象注入到项目的 ext 中
+            project.ext.set("flutter", flutterConfig)
         }
     }
 }
-
