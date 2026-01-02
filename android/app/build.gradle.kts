@@ -10,7 +10,7 @@ plugins {
 
 android {
     namespace = "com.tgwgroup.MiRearScreenGradienter"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = flutter.compileSdkVersion ?: 34
     ndkVersion = "27.0.12077973"
 
     compileOptions {
@@ -28,7 +28,7 @@ android {
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdk = 24
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = flutter.targetSdkVersion ?: 34
         versionCode = 1
         versionName = "1.0.0"
     }
