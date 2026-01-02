@@ -22,11 +22,7 @@
             android:exported="true"
             android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
         
-        <!-- Task Service -->
-        <service
-            android:name=".TaskService"
-            android:permission="moe.shizuku.manager.permission.API_V23"
-            android:exported="true" />
+        <!-- Task Service is a Shizuku UserService, started dynamically via Shizuku API, not declared here -->
 
         <!-- Keep Alive Service -->
         <service
