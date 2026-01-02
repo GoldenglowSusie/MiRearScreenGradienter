@@ -8,20 +8,15 @@ allprojects {
 val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
 rootProject.layout.buildDirectory.value(newBuildDir)
 
+// 应用 init.gradle 脚本为所有插件提供默认配置
+apply(from = "init.gradle")
+
 subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
     
     // 为所有子项目（包括插件）提供默认的 compileSdk 配置
     // 这解决了 Flutter 插件无法访问 flutter 对象的问题
-    // 必须在 beforeEvaluate 中设置，确保在插件 build.gradle 评估之前
-    beforeEvaluate {
-        // 设置项目扩展属性，插件可以在 build.gradle 中使用
-        if (!project.extensions.extraProperties.has("compileSdkVersion")) {
-            project.extensions.extraProperties.set("compileSdkVersion", 34)
-        }
-    }
-    
     afterEvaluate {
         if (project.hasProperty("android")) {
             try {
