@@ -202,7 +202,7 @@ distributionUrl=https\://mirrors.cloud.tencent.com/gradle/gradle-8.12-all.zip
 ### 工作流程
 
 1. **检出代码**
-2. **设置环境**：JDK 17、Flutter 3.24.0
+2. **设置环境**：JDK 17、Flutter 3.27.0（支持 Dart SDK 3.8.1+）
 3. **配置签名**（如果存在）
 4. **编译 APK**：Release 版本
 5. **重命名文件**：根据分支/标签生成文件名
@@ -291,7 +291,7 @@ git push origin v1.0.0
 - 签名配置不同
 
 **解决方法**：
-1. 检查工作流中的 Flutter 版本（当前：3.24.0）
+1. 检查工作流中的 Flutter 版本（当前：3.27.0，支持 Dart SDK 3.8.1+）
 2. 查看 Actions 日志了解具体错误
 3. 清理 GitHub Actions 缓存后重试
 
