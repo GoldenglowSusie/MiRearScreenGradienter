@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -38,8 +41,10 @@ android {
     val keystorePropertiesFile = rootProject.file("key.properties")
     if (keystorePropertiesFile.exists()) {
         // 如果存在签名文件，使用签名配置
-        val keystoreProperties = java.util.Properties()
-        keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
+        val keystoreProperties = Properties()
+        keystorePropertiesFile.inputStream().use { input ->
+            keystoreProperties.load(input)
+        }
         
         signingConfigs {
             create("release") {
