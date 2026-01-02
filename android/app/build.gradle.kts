@@ -64,7 +64,16 @@ android {
             } else {
                 signingConfigs.getByName("debug")
             }
+            // 禁用资源压缩，避免 PNG 编译错误
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
+    }
+
+    // 资源编译配置
+    androidResources {
+        // 不压缩 PNG 文件
+        noCompress += "png"
     }
 }
 
