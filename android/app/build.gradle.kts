@@ -39,7 +39,7 @@ android {
     if (keystorePropertiesFile.exists()) {
         // 如果存在签名文件，使用签名配置
         val keystoreProperties = java.util.Properties()
-        keystoreProperties.load(java.io.FileInputStream(keystorePropertiesFile))
+        keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
         
         signingConfigs {
             create("release") {
