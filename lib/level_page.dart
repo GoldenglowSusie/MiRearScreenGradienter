@@ -82,7 +82,7 @@ class _LevelPageState extends State<LevelPage> {
     double pitch = atan2(_y, sqrt(_x * _x + _z * _z)) * 180 / pi;
 
     // debugPrint('LevelPage build: roll=$roll, pitch=$pitch, x=$_x, y=$_y');
-
+//
     return Scaffold(
       backgroundColor: Colors.black,
       body: Padding(
