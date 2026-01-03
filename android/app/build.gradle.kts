@@ -64,7 +64,7 @@ android {
                 signingConfigs.getByName("release")
             } else {
                 signingConfigs.getByName("debug")
-        }
+            }
             // 禁用资源压缩，避免 PNG 编译错误
             isMinifyEnabled = false
             isShrinkResources = false

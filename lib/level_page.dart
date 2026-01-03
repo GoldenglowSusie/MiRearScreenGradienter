@@ -85,15 +85,26 @@ class _LevelPageState extends State<LevelPage> {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      body: SafeArea(
-        child: CustomPaint(
-          painter: LevelPainter(
-            x: _x,
-            y: _y,
-            roll: roll,
-            pitch: pitch,
+      body: Padding(
+        padding: EdgeInsets.fromLTRB(
+          _cutoutLeft,
+          _cutoutTop,
+          _cutoutRight,
+          _cutoutBottom,
+        ),
+        child: Container(
+          color: Colors.black,
+          width: double.infinity,
+          height: double.infinity,
+          child: CustomPaint(
+            painter: LevelPainter(
+              x: _x,
+              y: _y,
+              roll: roll,
+              pitch: pitch,
+            ),
+            child: Container(),
           ),
-          child: Container(),
         ),
       ),
     );
