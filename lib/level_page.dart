@@ -82,29 +82,25 @@ class _LevelPageState extends State<LevelPage> {
     double pitch = atan2(_y, sqrt(_x * _x + _z * _z)) * 180 / pi;
 
     // debugPrint('LevelPage build: roll=$roll, pitch=$pitch, x=$_x, y=$_y');
-//
+
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Padding(
-        padding: EdgeInsets.fromLTRB(
-          _cutoutLeft,
-          _cutoutTop,
-          _cutoutRight,
-          _cutoutBottom,
-        ),
-        child: Container(
-          color: Colors.black,
-          width: double.infinity,
-          height: double.infinity,
-          child: CustomPaint(
-            painter: LevelPainter(
-              x: _x,
-              y: _y,
-              roll: roll,
-              pitch: pitch,
-            ),
-            child: Container(),
+      body: Container(
+        color: Colors.black,
+        width: double.infinity,
+        height: double.infinity,
+        child: CustomPaint(
+          painter: LevelPainter(
+            x: _x,
+            y: _y,
+            roll: roll,
+            pitch: pitch,
+            cutoutLeft: _cutoutLeft,
+            cutoutTop: _cutoutTop,
+            cutoutRight: _cutoutRight,
+            cutoutBottom: _cutoutBottom,
           ),
+          child: Container(),
         ),
       ),
     );
@@ -116,18 +112,36 @@ class LevelPainter extends CustomPainter {
   final double y;
   final double roll;
   final double pitch;
+  final double cutoutLeft;
+  final double cutoutTop;
+  final double cutoutRight;
+  final double cutoutBottom;
 
   LevelPainter({
     required this.x,
     required this.y,
     required this.roll,
     required this.pitch,
+    required this.cutoutLeft,
+    required this.cutoutTop,
+    required this.cutoutRight,
+    required this.cutoutBottom,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final maxRadius = min(size.width, size.height) / 2 - 10; // Maximize size
+    // Calculate safe area (usable area after cutout)
+    final safeWidth = size.width - cutoutLeft - cutoutRight;
+    final safeHeight = size.height - cutoutTop - cutoutBottom;
+    
+    // Center in safe area
+    final center = Offset(
+      cutoutLeft + safeWidth / 2,
+      cutoutTop + safeHeight / 2,
+    );
+    
+    // Calculate radius based on safe area
+    final maxRadius = min(safeWidth, safeHeight) / 2 - 10;
 
     // Colors
     const gridColor = Colors.white;
@@ -248,14 +262,14 @@ class LevelPainter extends CustomPainter {
         ..color = gridColor.withOpacity(0.8),
     );
 
-    // Draw angle readouts at top corners (safe area edge)
+    // Draw angle readouts at safe area corners
     bool isLevel = tiltMagnitude < 3.0;
     
     _drawAngleText(
       canvas,
       'ROLL',
       roll,
-      const Offset(0, 0),
+      Offset(cutoutLeft + 8, cutoutTop + 8), // top left corner of safe area
       neonCyan,
       isLevel,
     );
@@ -264,7 +278,7 @@ class LevelPainter extends CustomPainter {
       canvas,
       'PITCH',
       pitch,
-      Offset(0, size.height - 40), // left bottom corner
+      Offset(cutoutLeft + 8, cutoutTop + safeHeight - 40), // bottom left corner of safe area
       neonCyan,
       isLevel,
     );

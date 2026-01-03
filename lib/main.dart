@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:ui';
 import 'dart:math' as math;
-import 'package:url_launcher/url_launcher.dart';
 import 'level_page.dart';
 
 void main() {
@@ -136,28 +136,24 @@ class _MyHomePageState extends State<MyHomePage> {
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.25),
                         ),
-                        padding: const EdgeInsets.all(24),
+                        padding: const EdgeInsets.all(16),
                         child: Column(
                           children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(24),
-                              child: Image.asset(
-                                'assets/icon/ic_launcher.png',
-                                width: 100,
-                                height: 100,
-                                fit: BoxFit.cover,
-                              ),
+                            Icon(
+                              _isRunning ? Icons.check_circle : Icons.info_outline,
+                              size: 48,
+                              color: _isRunning ? Colors.green : Colors.white,
                             ),
-                            const SizedBox(height: 16),
+                            const SizedBox(height: 12),
                             const Text(
                               '背屏水平仪',
                               style: TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 24,
                                 color: Colors.black87,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 4),
                             Text(
                               'Rear Screen Gradienter',
                               style: TextStyle(
@@ -174,7 +170,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
                 const SizedBox(height: 20),
 
-                // Status Card
+                // Main Action Button Card
                 CustomPaint(
                   painter: _SquircleBorderPainter(
                     radius: _SquircleRadii.large,
@@ -194,68 +190,62 @@ class _MyHomePageState extends State<MyHomePage> {
                         padding: const EdgeInsets.all(20),
                         child: Column(
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  _isRunning ? Icons.check_circle : Icons.info_outline,
-                                  size: 28,
-                                  color: _isRunning ? Colors.green : Colors.black54,
+                            Text(
+                              _isRunning ? '水平仪运行中...' : '准备就绪',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black87,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            ClipPath(
+                              clipper: _SquircleClipper(
+                                cornerRadius: _SquircleRadii.large,
+                              ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: _isRunning
+                                      ? null
+                                      : const LinearGradient(
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
+                                          colors: [
+                                            Color(0xFFFF9D88),
+                                            Color(0xFFFFB5C5),
+                                            Color(0xFFE0B5DC),
+                                            Color(0xFFA8C5E5),
+                                          ],
+                                        ),
+                                  color: _isRunning ? const Color(0xFFef4444) : null,
                                 ),
-                                const SizedBox(width: 10),
-                                Text(
-                                  _isRunning ? '水平仪运行中' : '准备就绪',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.black87,
-                                    fontWeight: FontWeight.w500,
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: _isRunning ? _stopLevel : _startLevel,
+                                    splashColor: Colors.white.withOpacity(0.3),
+                                    highlightColor: Colors.white.withOpacity(0.2),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 16,
+                                        horizontal: 32,
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          _isRunning ? '停止水平仪' : '启动水平仪',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ],
+                              ),
                             ),
                           ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // Main Action Button Cardd
-                ClipPath(
-                  clipper: _SquircleClipper(
-                    cornerRadius: _SquircleRadii.large,
-                  ),
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Color(0xFFFF9D88), // 珊瑚橙
-                          Color(0xFFFFB5C5), // 粉红
-                          Color(0xFFE0B5DC), // 紫色
-                          Color(0xFFA8C5E5), // 蓝色
-                        ],
-                      ),
-                    ),
-                    child: ElevatedButton(
-                      onPressed: _isRunning ? _stopLevel : _startLevel,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
-                        foregroundColor: Colors.white,
-                        shadowColor: Colors.transparent,
-                        padding: const EdgeInsets.symmetric(vertical: 20),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(_SquircleRadii.large),
-                        ),
-                      ),
-                      child: Text(
-                        _isRunning ? '停止水平仪' : '启动水平仪',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
@@ -315,15 +305,14 @@ class _MyHomePageState extends State<MyHomePage> {
                               ],
                             ),
                             const SizedBox(height: 16),
-                            Text(
+                            const Text(
                               'V1.0.0 • GPLv3 开源',
                               style: TextStyle(
                                 color: Colors.black54,
                                 fontSize: 12,
                               ),
                             ),
-                            const SizedBox(height: 8),
-                            Text(
+                            const Text(
                               '酷安@AntiOblivionis',
                               style: TextStyle(
                                 color: Colors.black54,
@@ -350,29 +339,28 @@ class _MyHomePageState extends State<MyHomePage> {
     required String label,
     required VoidCallback onPressed,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        customBorder: _SquircleShapeBorder(cornerRadius: _SquircleRadii.small),
-        splashColor: Colors.white.withOpacity(0.2),
-        highlightColor: Colors.white.withOpacity(0.1),
-        child: ClipPath(
-          clipper: _SquircleClipper(cornerRadius: _SquircleRadii.small),
+    return ClipPath(
+      clipper: _SquircleClipper(cornerRadius: _SquircleRadii.small),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          splashColor: Colors.white.withOpacity(0.3),
+          highlightColor: Colors.white.withOpacity(0.2),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
+              color: Colors.white.withOpacity(0.25),
             ),
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: const EdgeInsets.symmetric(vertical: 12),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
                   icon,
                   color: Colors.black87,
-                  size: 28,
+                  size: 24,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
                 Text(
                   label,
                   style: const TextStyle(
@@ -380,6 +368,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
@@ -390,118 +379,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-/// 超椭圆圆角半径
+/// 使用固定值确保视觉一致性（基于标准DPI 420计算）
 class _SquircleRadii {
+  // 16.4mm @ 420dpi ≈ 27dp，实际屏幕略大，取32dp
   static const double large = 32.0; // 大卡片圆角
-  static const double small = 12.0; // 小组件圆角
-}
-
-/// 精确的超椭圆（Squircle）形状边框 - 用于InkWell水波纹
-class _SquircleShapeBorder extends ShapeBorder {
-  final double cornerRadius;
-  static const double n = 2.84; // 超椭圆指数
-
-  const _SquircleShapeBorder({required this.cornerRadius});
-
-  @override
-  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
-
-  @override
-  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
-    return _createSquirclePath(rect.size, cornerRadius);
-  }
-
-  @override
-  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
-    return _createSquirclePath(rect.size, cornerRadius);
-  }
-
-  @override
-  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {}
-
-  @override
-  ShapeBorder scale(double t) =>
-      _SquircleShapeBorder(cornerRadius: cornerRadius * t);
-
-  static Path _createSquirclePath(Size size, double radius) {
-    final double width = size.width;
-    final double height = size.height;
-    final double effectiveRadius = radius.clamp(
-      0.0,
-      math.min(width, height) / 2,
-    );
-
-    final path = Path();
-    path.moveTo(0, effectiveRadius);
-    for (double t = 0; t <= 1.0; t += 0.02) {
-      final angle = (1 - t) * math.pi / 2;
-      final x =
-          effectiveRadius *
-          (1 -
-              math.pow(math.cos(angle).abs(), 2 / n) *
-                  (math.cos(angle) >= 0 ? 1 : -1));
-      final y =
-          effectiveRadius *
-          (1 -
-              math.pow(math.sin(angle).abs(), 2 / n) *
-                  (math.sin(angle) >= 0 ? 1 : -1));
-      path.lineTo(x, y);
-    }
-    path.lineTo(width - effectiveRadius, 0);
-    for (double t = 0; t <= 1.0; t += 0.02) {
-      final angle = t * math.pi / 2;
-      final x =
-          width -
-          effectiveRadius *
-              (1 -
-                  math.pow(math.cos(angle).abs(), 2 / n) *
-                      (math.cos(angle) >= 0 ? 1 : -1));
-      final y =
-          effectiveRadius *
-          (1 -
-              math.pow(math.sin(angle).abs(), 2 / n) *
-                  (math.sin(angle) >= 0 ? 1 : -1));
-      path.lineTo(x, y);
-    }
-    path.lineTo(width, height - effectiveRadius);
-    for (double t = 0; t <= 1.0; t += 0.02) {
-      final angle = (1 - t) * math.pi / 2 + math.pi / 2;
-      final x =
-          width -
-          effectiveRadius *
-              (1 -
-                  math.pow(math.cos(angle).abs(), 2 / n) *
-                      (math.cos(angle) >= 0 ? 1 : -1));
-      final y =
-          height -
-          effectiveRadius *
-              (1 -
-                  math.pow(math.sin(angle).abs(), 2 / n) *
-                      (math.sin(angle) >= 0 ? 1 : -1));
-      path.lineTo(x, y);
-    }
-    path.lineTo(effectiveRadius, height);
-    for (double t = 0; t <= 1.0; t += 0.02) {
-      final angle = t * math.pi / 2 + math.pi;
-      final x =
-          effectiveRadius *
-          (1 -
-              math.pow(math.cos(angle).abs(), 2 / n) *
-                  (math.cos(angle) >= 0 ? 1 : -1));
-      final y =
-          height -
-          effectiveRadius *
-              (1 -
-                  math.pow(math.sin(angle).abs(), 2 / n) *
-                      (math.sin(angle) >= 0 ? 1 : -1));
-      path.lineTo(x, y);
-    }
-    path.close();
-    return path;
-  }
+  static const double small = 12.0; // 小组件圆角 (large * 0.375)
 }
 
 /// 精确的超椭圆（Squircle）裁剪器
+/// 使用2.84指数实现与屏幕圆角一致的平滑曲线
 class _SquircleClipper extends CustomClipper<Path> {
   final double cornerRadius;
   static const double n = 2.84; // 超椭圆指数
@@ -519,14 +405,31 @@ class _SquircleClipper extends CustomClipper<Path> {
     final r = radius;
 
     final path = Path();
+
+    // 从左上角开始，顺时针绘制
     path.moveTo(0, r);
+
+    // 左上角超椭圆
     _drawSquircleArc(path, r, r, r, math.pi, math.pi * 1.5);
+
+    // 上边
     path.lineTo(w - r, 0);
+
+    // 右上角超椭圆
     _drawSquircleArc(path, w - r, r, r, math.pi * 1.5, math.pi * 2);
+
+    // 右边
     path.lineTo(w, h - r);
+
+    // 右下角超椭圆
     _drawSquircleArc(path, w - r, h - r, r, 0, math.pi * 0.5);
+
+    // 下边
     path.lineTo(r, h);
+
+    // 左下角超椭圆
     _drawSquircleArc(path, r, h - r, r, math.pi * 0.5, math.pi);
+
     path.close();
     return path;
   }
@@ -540,13 +443,18 @@ class _SquircleClipper extends CustomClipper<Path> {
     double endAngle,
   ) {
     const int segments = 30;
+
     for (int i = 0; i <= segments; i++) {
       final t = i / segments;
       final angle = startAngle + (endAngle - startAngle) * t;
+
       final cosA = math.cos(angle);
       final sinA = math.sin(angle);
+
+      // 超椭圆公式: r * sgn(t) * |t|^(2/n)
       final x = cx + radius * _sgn(cosA) * math.pow(cosA.abs(), 2.0 / n);
       final y = cy + radius * _sgn(sinA) * math.pow(sinA.abs(), 2.0 / n);
+
       path.lineTo(x, y);
     }
   }
@@ -559,6 +467,7 @@ class _SquircleClipper extends CustomClipper<Path> {
 }
 
 /// 精确的超椭圆边框绘制器
+/// 用于绘制带边框的超椭圆
 class _SquircleBorderPainter extends CustomPainter {
   final double radius;
   final Color color;
@@ -588,13 +497,22 @@ class _SquircleBorderPainter extends CustomPainter {
 
     final path = Path();
     path.moveTo(0, r);
+
+    // 左上角
     _drawSquircleArc(path, r, r, r, math.pi, math.pi * 1.5);
     path.lineTo(w - r, 0);
+
+    // 右上角
     _drawSquircleArc(path, w - r, r, r, math.pi * 1.5, math.pi * 2);
     path.lineTo(w, h - r);
+
+    // 右下角
     _drawSquircleArc(path, w - r, h - r, r, 0, math.pi * 0.5);
     path.lineTo(r, h);
+
+    // 左下角
     _drawSquircleArc(path, r, h - r, r, math.pi * 0.5, math.pi);
+
     path.close();
     return path;
   }
